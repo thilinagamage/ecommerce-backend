@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "C:\\php-8.4.12\\php.exe",
+            "args": [
+                "D:\\Laravel Project\\ecommerce-backend\\artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}
