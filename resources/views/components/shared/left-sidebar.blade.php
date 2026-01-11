@@ -1,7 +1,7 @@
         <aside class="sidebar-wrapper" data-simplebar="true">
           <div class="sidebar-header">
             <div>
-              <img src="assets/images/logo-icon.png" class="logo-icon" alt="logo icon">
+              <img src="{{ asset('assets/images/logo-icon.png') }}" class="logo-icon" alt="logo icon">
             </div>
             <div>
               <h4 class="logo-text">Sahasra Labs</h4>
@@ -13,7 +13,7 @@
           <ul class="metismenu" id="menu">
             <li class="menu-label">Menu</li>
             <li>
-              <a href="javascript:;" class="">
+              <a href="{{ route('admin.dashboard.index') }}" class="">
                 <div class="parent-icon"><i class="bi bi-house-fill"></i>
                 </div>
                 <div class="menu-title">Dashboard</div>
@@ -29,15 +29,13 @@
                 <div class="menu-title">Products</div>
               </a>
               <ul>
-                <li> <a href="ecommerce-products-list.html"><i class="bi bi-circle"></i>Products List</a>
-                </li>
-                <li> <a href="ecommerce-products-grid.html"><i class="bi bi-circle"></i>Products Grid</a>
+                <li> <a href="{{ route('products.index') }}"><i class="bi bi-circle"></i>Products List</a>
                 </li>
                 <li> <a href="{{ route('products.categories.index') }}"><i class="bi bi-circle"></i>Categories</a>
                 </li>
-                <li> <a href="ecommerce-add-new-product.html"><i class="bi bi-circle"></i>Add New Product</a>
+                <li> <a href="{{ route('products.attributes.index') }}"><i class="bi bi-circle"></i>Attributes</a>
                 </li>
-                <li> <a href="ecommerce-add-new-product-2.html"><i class="bi bi-circle"></i>Add New Product 2</a>
+                <li> <a href="{{ route('products.tags.index') }}"><i class="bi bi-circle"></i>Tags</a>
                 </li>
               </ul>
             </li>
