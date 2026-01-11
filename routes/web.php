@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\Dashboard\OverviewController;
+use App\Http\Controllers\Admin\Products\CategoryController;
 use App\Http\Controllers\Admin\User\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -23,7 +24,16 @@ Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.e
 Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
 Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
+Route::prefix('categories')->controller(CategoryController::class)->group(function() {
+    Route::get('/', 'index')->name('products.categories.index');
+    Route::get('/create', 'create')->name('products.categories.create');
+    Route::post('/store', 'store')->name('products.categories.store');
+    Route::get('/{category}/edit','edit')->name('products.categories.edit');
+    Route::put('/{category}', 'update')->name('products.categories.update');
+    Route::delete('/{category}', 'destroy')->name('products.categories.destroy');
+    Route::get('/{category}}','show')->name('products.categories.show');
 
+});
 
 Route::get('/', function (OverviewController $controller) {
     return $controller->index();

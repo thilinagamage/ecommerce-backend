@@ -96,3 +96,6 @@
         </div>
     </main>
 @endsection
+@push('datatable-scripts')
+    <script src="{{ asset('assets/js/datatables/users.index.js') }}"></script>
+@endpush

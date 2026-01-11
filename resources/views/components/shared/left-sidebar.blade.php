@@ -33,7 +33,7 @@
                 </li>
                 <li> <a href="ecommerce-products-grid.html"><i class="bi bi-circle"></i>Products Grid</a>
                 </li>
-                <li> <a href="ecommerce-products-categories.html"><i class="bi bi-circle"></i>Categories</a>
+                <li> <a href="{{ route('products.categories.index') }}"><i class="bi bi-circle"></i>Categories</a>
                 </li>
                 <li> <a href="ecommerce-add-new-product.html"><i class="bi bi-circle"></i>Add New Product</a>
                 </li>
