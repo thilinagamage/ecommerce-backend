@@ -89,4 +89,9 @@ class Product extends Model
         return $this->belongsToMany(Tag::class);
     }
 
+        public function collections()
+    {
+        return $this->belongsToMany(Collection::class);
+    }
+
 }
