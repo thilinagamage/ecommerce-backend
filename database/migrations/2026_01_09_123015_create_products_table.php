@@ -14,22 +14,26 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
 
+            // Core identity
             $table->string('name');
             $table->string('slug')->unique();
 
-            $table->text('description')->nullable();
+            // Descriptions
             $table->text('short_description')->nullable();
+            $table->longText('description')->nullable();
 
-            $table->enum('type', ['simple', 'variable'])->default('simple');
+            // Product type (future-ready)
+            $table->enum('product_type', ['simple', 'variable'])->default('simple');
 
-            $table->decimal('price', 10, 2)->nullable(); // used for simple product
-            $table->decimal('sale_price', 10, 2)->nullable();
+            // Status & visibility
+            $table->enum('status', ['draft', 'published'])->default('draft');
+            $table->enum('visibility', ['shop', 'search', 'both', 'hidden'])->default('both');
 
-            $table->enum('status', ['draft', 'published', 'inactive'])->default('draft');
-
-            // SEO
-            $table->string('meta_title')->nullable();
-            $table->text('meta_description')->nullable();
+            // Collection (you already built this)
+            $table->foreignId('collection_id')
+                ->nullable()
+                ->constrained()
+                ->nullOnDelete();
 
             $table->timestamps();
         });

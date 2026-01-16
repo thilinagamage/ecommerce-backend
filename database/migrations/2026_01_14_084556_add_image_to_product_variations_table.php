@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_tag', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('tag_id')->constrained()->cascadeOnDelete();
-            $table->unique(['product_id', 'tag_id']);
+        Schema::table('product_variations', function (Blueprint $table) {
+            $table->string('image')->nullable()->after('sku');
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_tag');
+        Schema::table('product_variations', function (Blueprint $table) {
+            $table->dropColumn('image');
+        });
     }
 };

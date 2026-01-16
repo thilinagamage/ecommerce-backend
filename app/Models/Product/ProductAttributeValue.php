@@ -16,4 +16,14 @@ class ProductAttributeValue extends Model
     {
         return $this->belongsTo(ProductAttribute::class, 'product_attribute_id');
     }
+    public function variations()
+{
+    return $this->belongsToMany(
+        ProductVariation::class,
+        'product_variation_attributes',
+        'product_attribute_value_id',
+        'product_variation_id'
+    )->withPivot('attribute_id')->withTimestamps();
+}
+
 }

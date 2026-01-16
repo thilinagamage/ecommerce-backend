@@ -48,9 +48,36 @@ Route::prefix('products')->controller(ProductController::class)->group(function(
     Route::get('/create', 'create')->name('products.create');
     Route::post('/store', 'store')->name('products.store');
     Route::get('/{id}/edit','edit')->name('products.edit');
-    Route::put('/{id}','edit')->name('products.update');
-    Route::delete('/destroy','destroy')->name('products.destroy');
+    Route::put('/{id}','update')->name('products.update');
+    Route::get('products/{id}','show')->name('products.show');
+    Route::delete('/{id}','destroy')->name('products.destroy');
+    Route::delete('/products/gallery-image/{image}','deleteGalleryImage')->name('products.gallery-image.delete');
+
 });
+
+Route::prefix('products/{product}')->group(function () {
+
+    Route::post('variations/generate',
+        [ProductVariationController::class, 'generate']
+    )->name('products.variations.generate');
+
+    Route::delete('variations/{variation}',
+        [ProductVariationController::class, 'destroy']
+    )->name('products.variations.destroy');
+
+    Route::post('variations/{variation}/toggle',
+        [ProductVariationController::class, 'toggle']
+    )->name('products.variations.toggle');
+
+    Route::put('variations/{variation}',
+        [ProductVariationController::class, 'update']
+    )->name('products.variations.update');
+
+    Route::delete('variations-cleanup',
+        [ProductVariationController::class, 'cleanup']
+    )->name('products.variations.cleanup');
+});
+
 
 Route::prefix('attributes')->controller(AttributeController::class)->group(function() {
     Route::get('/','index')->name('products.attributes.index');
