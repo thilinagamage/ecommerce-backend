@@ -34,8 +34,10 @@ class Tag extends Model
     /**
      * Relationship: Tag ↔ Products
      */
+
     public function products()
-    {
-        return $this->belongsToMany(Product::class);
-    }
+{
+    return $this->belongsToMany(Product::class, 'product_tag');
+}
+
 }

@@ -48,7 +48,7 @@
                 <div class="menu-title">Orders</div>
               </a>
               <ul>
-                <li> <a href="ecommerce-products-list.html"><i class="bi bi-circle"></i>Order List</a>
+                <li> <a href="{{ route('orders.index') }}"><i class="bi bi-circle"></i>Order List</a>
                 </li>
                 <li> <a href="ecommerce-transactions.html"><i class="bi bi-circle"></i>Transactions</a>
                 </li>

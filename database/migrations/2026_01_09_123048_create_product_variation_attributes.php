@@ -11,28 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_variation_attributes', function (Blueprint $table) {
-            $table->id();
+Schema::create('product_variation_attributes', function (Blueprint $table) {
+    $table->id();
 
-            $table->foreignId('product_variation_id')
-                ->constrained()
-                ->cascadeOnDelete();
+    $table->foreignId('product_variation_id')
+          ->constrained('product_variations')
+          ->cascadeOnDelete();
 
-            $table->foreignId('product_attribute_id')
-                ->constrained()
-                ->cascadeOnDelete();
+    $table->foreignId('attribute_id')
+          ->constrained('product_attributes')
+          ->cascadeOnDelete();
 
-            $table->foreignId('product_attribute_value_id')
-                ->constrained()
-                ->cascadeOnDelete();
+    $table->foreignId('attribute_value_id')
+          ->constrained('product_attribute_values')
+          ->cascadeOnDelete();
 
-            $table->timestamps();
+    $table->timestamps();
+});
 
-            $table->unique([
-                'product_variation_id',
-                'product_attribute_id'
-            ], 'variation_attribute_unique');
-        });
+
 
     }
 

@@ -95,4 +95,9 @@ class Category extends Model
     {
         return $this->meta_description ?? Str::limit(strip_tags($this->description), 160);
     }
+    public function products()
+{
+    return $this->belongsToMany(Product::class, 'product_category');
+}
+
 }

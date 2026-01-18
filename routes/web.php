@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\Admin\Dashboard\OverviewController;
+use App\Http\Controllers\Admin\Orders\OrderController;
 use App\Http\Controllers\Admin\Products\AttributeController;
 use App\Http\Controllers\Admin\Products\CategoryController;
 use App\Http\Controllers\Admin\Products\CollectionController;
 use App\Http\Controllers\Admin\Products\ProductController;
 use App\Http\Controllers\Admin\Products\ProductVariationController;
+use App\Http\Controllers\Admin\Products\ReviewController;
 use App\Http\Controllers\Admin\Products\TagController;
 use App\Http\Controllers\Admin\User\UserController;
 use Illuminate\Support\Facades\Route;
@@ -49,9 +51,36 @@ Route::prefix('products')->controller(ProductController::class)->group(function(
     Route::get('/create', 'create')->name('products.create');
     Route::post('/store', 'store')->name('products.store');
     Route::get('/{id}/edit','edit')->name('products.edit');
-    Route::put('/{id}','edit')->name('products.update');
-    Route::delete('/destroy','destroy')->name('products.destroy');
+    Route::put('/{id}','update')->name('products.update');
+    Route::get('products/{id}','show')->name('products.show');
+    Route::delete('/{id}','destroy')->name('products.destroy');
+    Route::delete('/products/gallery-image/{image}','deleteGalleryImage')->name('products.gallery-image.delete');
+
 });
+
+Route::prefix('products/{product}')->group(function () {
+
+    Route::post('variations/generate',
+        [ProductVariationController::class, 'generate']
+    )->name('products.variations.generate');
+
+    Route::delete('variations/{variation}',
+        [ProductVariationController::class, 'destroy']
+    )->name('products.variations.destroy');
+
+    Route::post('variations/{variation}/toggle',
+        [ProductVariationController::class, 'toggle']
+    )->name('products.variations.toggle');
+
+    Route::put('variations/{variation}',
+        [ProductVariationController::class, 'update']
+    )->name('products.variations.update');
+
+    Route::delete('variations-cleanup',
+        [ProductVariationController::class, 'cleanup']
+    )->name('products.variations.cleanup');
+});
+
 
 Route::prefix('attributes')->controller(AttributeController::class)->group(function() {
     Route::get('/','index')->name('products.attributes.index');
@@ -72,6 +101,54 @@ Route::prefix('tags')->controller(TagController::class)->group(function() {
 
 
 });
+Route::prefix('inventory')->controller(InventoryController::class)->group(function() {
+    Route::get('/', 'index')->name('products.inventory.index');
+    Route::get('/adjust/{id}', 'adjustStock')->name('products.inventory.adjust');
+    Route::put('/update/{id}','updateStock')->name('products.inventory.update');
+    Route::get('/movements','movements')->name('products.inventory.movements');
+    Route::get('/low-stock', 'lowStock')->name('products.inventory.low-stock');
+    Route::get('/out-of-stock','outOfStock')->name('products.inventory.out-of-stock');
+    Route::get('/variations/{id}', 'viewVariations')->name('variations');
+
+
+});
+
+Route::prefix('reviews')->controller(ReviewController::class)->group(function() {
+    Route::get('/','index')->name('products.reviews.index');
+    Route::get('/create','create')->name('products.reviews.create');
+    Route::post('/','store')->name('products.reviews.store');
+    Route::get('/{id}','show')->name('products.reviews.show');
+    Route::get('/{id}/edit','edit')->name('products.reviews.edit');
+    Route::put('/{id}','update')->name('products.reviews.update');
+    Route::delete('/{id}','destroy')->name('reviews.destroy');
+
+    // Additional actions
+    Route::post('/bulk-action','bulkAction')->name('products.reviews.bulk-action');
+    Route::post('/{id}/status','updateStatus')->name('products.reviews.update-status');
+    Route::post('/{id}/reply','addReply')->name('products.reviews.add-reply');
+
+
+});
+
+Route::prefix('orders')->controller(OrderController::class)->group(function() {
+    Route::get('/','index')->name('orders.index');
+    Route::get('/create','create')->name('orders.create');
+    Route::post('/', 'store')->name('orders.store');
+    Route::get('/{id}', 'show')->name('orders.show');
+    Route::get('/{id}/edit', 'edit')->name('orders.edit');
+    Route::put('/{id}', 'update')->name('orders.update');
+    Route::delete('/{id}', 'destroy')->name('orders.destroy');
+
+    // Additional actions
+    Route::post('/{id}/status','updateStatus')->name('update-status');
+    Route::post('/{id}/payment-status', )->name('orders.add-note');
+    Route::post('/{id}/refund', 'refund')->name('orders.refund');
+    Route::get('/{id}/invoice', 'invoice')->name('orders.invoice');
+
+
+});
+
+
 
 
 Route::prefix('collections')->controller(CollectionController::class)->group(function() {

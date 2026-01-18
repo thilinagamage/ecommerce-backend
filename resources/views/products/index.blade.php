@@ -4,43 +4,30 @@
 <main class="page-content">
     <div class="card">
         <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h5 class="mb-0">Products List</h5>
-                <a href="{{ route('products.create') }}" class="btn btn-outline-primary">
-                    <i class="bi bi-plus-circle"></i> Add New Product
-                </a>
-            </div>
+            <h4 class="card-title mb-4">Products</h4>
 
-            {{-- Search / Filters --}}
+
+    {{-- Success Message --}}
+    @if(session('success'))
+         <div class="alert border-0 bg-light-success alert-dismissible fade show py-2">
+              <div class="d-flex align-items-center">
+                      <div class="fs-3 text-success"><i class="bi bi-check-circle-fill"></i>
+              </div>
+                <div class="ms-3">
+                     <div class="text-success"> {{ session('success') }}</div>
+                 </div>
+            </div>
+             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
             <div class="mb-3">
-                <form method="GET" action="{{ route('products.index') }}" class="row g-2">
-                    <div class="col-md-4">
-                        <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search by name or SKU">
-                    </div>
-                    <div class="col-md-2">
-                        <select name="status" class="form-select">
-                            <option value="">All Status</option>
-                            <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
-                            <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Draft</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <select name="type" class="form-select">
-                            <option value="">All Types</option>
-                            <option value="simple" {{ request('type') == 'simple' ? 'selected' : '' }}>Simple</option>
-                            <option value="variable" {{ request('type') == 'variable' ? 'selected' : '' }}>Variable</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-outline-dark w-100"><i class="bi bi-search"></i> Filter</button>
-                    </div>
-                </form>
+                <a href="{{ route('products.create') }}" class="btn btn-primary">Add New Product</a>
             </div>
 
-            {{-- Products Table --}}
             <div class="table-responsive">
-                <table class="table table-striped align-middle">
-                    <thead>
+                <table class="table table-bordered table-striped">
+                    <thead class="table-light">
                         <tr>
                             <th>#</th>
                             <th>Name</th>
@@ -48,69 +35,59 @@
                             <th>Price</th>
                             <th>Stock</th>
                             <th>Status</th>
-                            <th>SEO</th>
-                            <th>Created At</th>
-                            <th class="text-center">Actions</th>
+                            <th>Visibility</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($products as $product)
+                        @forelse($products as $index => $product)
+                            @php
+                                // Ensure variations is always a collection
+                                $variations = $product->variations ?? collect();
+                            @endphp
                             <tr>
-                                <td>{{ $loop->iteration + ($products->currentPage()-1) * $products->perPage() }}</td>
+                                <td>{{ $products->firstItem() + $index }}</td>
                                 <td>{{ $product->name }}</td>
                                 <td>{{ ucfirst($product->type) }}</td>
                                 <td>
                                     @if($product->type === 'simple')
                                         ${{ number_format($product->price, 2) }}
                                     @else
-                                        Min: ${{ number_format($product->variations->min('price') ?? 0, 2) }}<br>
-                                        Max: ${{ number_format($product->variations->max('price') ?? 0, 2) }}
+                                        Min: ${{ number_format($variations->min('price') ?? 0, 2) }}<br>
+                                        Max: ${{ number_format($variations->max('price') ?? 0, 2) }}
                                     @endif
                                 </td>
                                 <td>
                                     @if($product->type === 'simple')
-                                        {{ $product->variations->first()->stock ?? 0 }}
+                                        {{ $variations->first()->stock ?? 0 }}
                                     @else
-                                        {{ $product->variations->sum('stock') }}
+                                        {{ $variations->sum('stock') }}
                                     @endif
                                 </td>
+                                <td>{{ ucfirst($product->status) }}</td>
+                                <td>{{ ucfirst($product->visibility) }}</td>
                                 <td>
-                                    @if($product->status === 'published')
-                                        <span class="badge bg-success">Published</span>
-                                    @else
-                                        <span class="badge bg-secondary">Draft</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <small>Meta: {{ Str::limit($product->meta_title, 30) }}</small><br>
-                                    <small>Slug: {{ $product->slug }}</small>
-                                </td>
-                                <td>{{ $product->created_at->format('d M, Y') }}</td>
-                                <td class="text-center">
-                                    <a href="{{ route('products.edit', $product->id) }}" class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                    <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Delete this product?');">
+                                    <a href="{{ route('products.show', $product->id) }}" class="btn btn-sm btn-warning">View</a>
+                                    <a href="{{ route('products.edit', $product->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                    <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="btn btn-sm btn-outline-danger">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
                                     </form>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center">No products found.</td>
+                                <td colspan="8" class="text-center">No products found.</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
-            </div>
 
-            {{-- Pagination --}}
-            <div class="d-flex justify-content-end mt-3">
-                {{ $products->links() }}
+                {{-- Pagination --}}
+                <div class="d-flex justify-content-end">
+                    {{ $products->links() }}
+                </div>
             </div>
         </div>
     </div>

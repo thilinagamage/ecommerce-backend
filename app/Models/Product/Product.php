@@ -3,6 +3,7 @@
 namespace App\Models\Product;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class Product extends Model
@@ -10,83 +11,112 @@ class Product extends Model
         protected $fillable = [
         'name',
         'slug',
-        'description',
         'short_description',
-        'type',
-        'price',
-        'sale_price',
+        'description',
+        'product_type',
         'status',
-        'meta_title',
-        'meta_description',
+        'visibility',
+        'collection_id',
+
+        'sku',
+        'manage_stock',
+        'stock_quantity',
+        'low_stock_threshold',
+        'stock_status',
+        'backorders',
+
+        'regular_price',
+        'sale_price',
+        'sale_price_from',
+        'sale_price_to',
     ];
 
-       protected static function booted()
+        // Slug auto-generate
+    protected static function booted()
     {
         static::creating(function ($product) {
             if (empty($product->slug)) {
-                $product->slug = static::generateUniqueSlug($product->name);
+                $product->slug = Str::slug($product->name);
             }
         });
 
-        static::updating(function ($product) {
-            if ($product->isDirty('name') && empty($product->slug)) {
-                $product->slug = static::generateUniqueSlug($product->name, $product->id);
-            }
-        });
     }
 
-    public static function generateUniqueSlug($name, $ignoreId = null)
-    {
-        $slug = Str::slug($name);
-        $original = $slug;
-        $count = 1;
-
-        while (static::where('slug', $slug)
-            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
-            ->exists()
-        ) {
-            $slug = $original . '-' . $count++;
-        }
-
-        return $slug;
-    }
-
-        // Global product images
     public function images()
     {
         return $this->hasMany(ProductImage::class);
     }
 
-        // Featured image
     public function featuredImage()
     {
         return $this->hasOne(ProductImage::class)->where('is_featured', true);
     }
 
-        // Product variations
-    public function variations()
+    public function galleryImages()
     {
-        return $this->hasMany(ProductVariation::class);
-    }
-
-        public function isVariable()
-    {
-        return $this->type === 'variable';
-    }
-
-    public function isSimple()
-    {
-        return $this->type === 'simple';
+        return $this->hasMany(ProductImage::class)->where('is_featured', false)->orderBy('sort_order');
     }
 
     public function categories()
     {
-        return $this->belongsToMany(Category::class, 'product_category', 'product_id', 'category_id');
+        return $this->belongsToMany(Category::class, 'product_category');
     }
 
     public function tags()
     {
-        return $this->belongsToMany(Tag::class);
+        return $this->belongsToMany(Tag::class, 'product_tag');
+    }
+
+    public function collection()
+    {
+        return $this->belongsTo(Collection::class);
+    }
+
+    public function getPriceAttribute()
+    {
+        $today = Carbon::today();
+
+        if (
+            $this->sale_price &&
+            (
+                (!$this->sale_price_from || $today->gte($this->sale_price_from)) &&
+                (!$this->sale_price_to || $today->lte($this->sale_price_to))
+            )
+        ) {
+            return $this->sale_price;
+        }
+
+        return $this->regular_price;
+    }
+
+    public function variations()
+    {
+        return $this->hasMany(ProductVariation::class);
+    }
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
+    public function approvedReviews()
+    {
+        return $this->hasMany(ProductReview::class)->where('status', 'approved');
+    }
+
+    public function averageRating()
+    {
+        return $this->approvedReviews()->avg('rating');
+    }
+
+
+    public function reviewsCount()
+    {
+        return $this->approvedReviews()->count();
     }
 
         public function collections()

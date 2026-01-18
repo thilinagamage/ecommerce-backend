@@ -2,298 +2,338 @@
 
 @section('content')
 <main class="page-content">
-    <div class="card">
-        <div class="card-body">
+<div class="card">
+<div class="card-body">
 
-                <form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data">
-                @csrf
+<h4 class="card-title mb-4">Create Product</h4>
 
-                <div class="card">
-                <div class="card-body">
+{{-- Errors --}}
+@if ($errors->any())
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
-                    {{-- BASIC INFO --}}
-<div class="card mb-3">
-    <div class="card-body">
-        <div class="mb-3">
-            <label>Product Name *</label>
-            <input name="name" class="form-control" required>
-        </div>
+<form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data">
+@csrf
 
-        <div class="mb-3">
-            <label>Slug</label>
-            <input name="slug" class="form-control">
-        </div>
-
-        <div class="mb-3">
-            <label>Short Description</label>
-            <textarea name="short_description" class="form-control"></textarea>
-        </div>
-
-        <div class="mb-3">
-            <label>Description</label>
-            <textarea name="description" class="form-control"></textarea>
-        </div>
-        {{-- Product Main Image --}}
+{{-- BASIC INFO --}}
 <div class="mb-3">
-    <label class="form-label">Product Image</label>
-    <input type="file" name="image" class="form-control">
+    <label class="form-label">Product Name</label>
+    <input type="text" name="name" class="form-control" value="{{ old('name') }}" required>
 </div>
 
-<select name="categories[]" multiple>
+<div class="mb-3">
+    <label class="form-label">Slug</label>
+    <input type="text" name="slug" class="form-control" value="{{ old('slug') }}">
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Short Description</label>
+    <textarea name="short_description" class="form-control">{{ old('short_description') }}</textarea>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Description</label>
+    <textarea name="description" class="form-control" rows="4">{{ old('description') }}</textarea>
+</div>
+
+{{-- IMAGES --}}
+<div class="mb-3">
+    <label class="form-label">Featured Image</label>
+    <input type="file" name="featured_image" class="form-control">
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Gallery Images</label>
+    <input type="file" name="gallery_images[]" multiple class="form-control">
+</div>
+
+{{-- CATEGORIES --}}
+<div class="mb-3">
+    <label class="form-label">Categories</label>
     @foreach($categories as $category)
-        <option value="{{ $category->id }}">{{ $category->name }}</option>
+        <div>
+            <label>
+                <input type="checkbox" name="categories[]" value="{{ $category->id }}">
+                {{ $category->name }}
+            </label>
+        </div>
     @endforeach
-</select>
+</div>
 
+{{-- TAGS --}}
+<div class="mb-3">
+    <label class="form-label">Tags</label>
+    <select name="tags[]" class="form-control" multiple>
+        @foreach($tags as $tag)
+            <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+        @endforeach
+    </select>
+</div>
 
-{{-- Product Gallery --}}
+{{-- PRODUCT TYPE --}}
+<div class="mb-3">
+    <label class="form-label">Product Type</label>
+    <select name="product_type" id="product_type" class="form-select">
+        <option value="simple" {{ old('product_type') === 'simple' ? 'selected' : '' }}>Simple</option>
+        <option value="variable" {{ old('product_type') === 'variable' ? 'selected' : '' }}>Variable</option>
+    </select>
+</div>
+
+{{-- SIMPLE PRODUCT --}}
+<div id="simple-product-fields">
+
+<h5 class="mt-4">Inventory</h5>
 
 <div class="mb-3">
-    <label class="form-label">Product Gallery</label>
-    <input type="file" name="gallery[]" class="form-control" multiple>
+    <label>SKU</label>
+    <input type="text" name="sku" class="form-control">
 </div>
 
-        <div class="row">
-            <div class="col">
-                <label>Status</label>
-                <select name="status" class="form-select">
-                    <option value="draft">Draft</option>
-                    <option value="published">Published</option>
-                </select>
-            </div>
+<div class="form-check mb-3">
+    <input type="checkbox" name="manage_stock" value="1" class="form-check-input" id="manage_stock">
+    <label class="form-check-label">Manage stock?</label>
+</div>
 
-            <div class="col">
-                <label>Product Type</label>
-                <select name="type" id="productType" class="form-select">
-                    <option value="simple">Simple Product</option>
-                    <option value="variable">Variable Product</option>
-                </select>
-            </div>
+<div id="stock-fields" style="display:none">
+    <div class="mb-3">
+        <label>Stock Quantity</label>
+        <input type="number" name="stock_quantity" class="form-control">
+    </div>
 
-        </div>
+    <div class="mb-3">
+        <label>Low Stock Threshold</label>
+        <input type="number" name="low_stock_threshold" class="form-control">
+    </div>
+
+    <div class="form-check mb-3">
+        <input type="checkbox" name="backorders" value="1" class="form-check-input">
+        <label class="form-check-label">Allow backorders?</label>
     </div>
 </div>
 
+<h5 class="mt-4">Pricing</h5>
 
-<div id="simpleSection">
-    <div class="row">
-        <div class="col">
-            <label>Price</label>
-            <input name="price" class="form-control">
-        </div>
-        <div class="col">
-            <label>Sale Price</label>
-            <input name="sale_price" class="form-control">
-        </div>
-        <div class="col">
-            <label>Quantity</label>
-            <input name="qty" class="form-control">
-        </div>
-    </div>
+<div class="mb-3">
+    <label>Regular Price</label>
+    <input type="number" step="0.01" name="regular_price" class="form-control">
 </div>
 
-
-
-                    {{-- VARIABLE PRODUCT SECTION --}}
-                    <div id="variableSection" style="display:none">
-
-                        {{-- ATTRIBUTES --}}
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <h6>Attributes</h6>
-
-                                @foreach($attributes as $attribute)
-                                    <div class="mb-3">
-                                        <label>{{ $attribute->name }}</label>
-                                        <select
-                                            class="form-select attribute-select"
-                                            data-attribute-id="{{ $attribute->id }}"
-                                            multiple>
-                                            @foreach($attribute->values as $value)
-                                                <option value="{{ $value->id }}">
-                                                    {{ $value->value }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                @endforeach
-
-                                <button type="button" id="generateVariations" class="btn btn-primary">
-                                    Generate Variations
-                                </button>
-                            </div>
-                        </div>
-
-                        {{-- BULK EDIT --}}
-<div class="card mb-3">
-    <div class="card-body">
-        <h6>Bulk Edit</h6>
-        <div class="row g-2">
-            <div class="col">
-                <input id="bulk_price" class="form-control" placeholder="Bulk price">
-            </div>
-            <div class="col">
-                <input id="bulk_sale_price" class="form-control" placeholder="Bulk sale">
-            </div>
-            <div class="col">
-                <input id="bulk_qty" class="form-control" placeholder="Bulk qty">
-            </div>
-            <div class="col">
-                <button type="button" id="applyBulk" class="btn btn-outline-primary">
-                    Apply to all
-                </button>
-            </div>
-        </div>
-    </div>
+<div class="mb-3">
+    <label>Sale Price</label>
+    <input type="number" step="0.01" name="sale_price" class="form-control">
 </div>
 
-
-                        {{-- VARIATIONS --}}
-                        <div id="variationsWrapper"></div>
-                    </div>
-
-                    <div class="card mb-3">
-
-    <div class="card-body">
-        <h6>SEO</h6>
-
-        <div class="mb-3">
-            <label>Meta Title</label>
-            <input name="meta_title" class="form-control">
-        </div>
-
-        <div class="mb-3">
-            <label>Meta Description</label>
-            <textarea name="meta_description" class="form-control"></textarea>
-        </div>
-    </div>
 </div>
 
-                    <button class="btn btn-success mt-3">Save Product</button>
+{{-- VARIABLE PRODUCT --}}
+<div id="variable-attributes" style="display:none">
 
+<h5 class="mt-4">Attributes</h5>
 
-                </div>
-                </div>
-                </form>
-
-
-        </div>
+@foreach($attributes as $attribute)
+    <div class="mb-3">
+        <label>{{ $attribute->name }}</label>
+        <select class="form-control attribute-select"
+                data-attribute-id="{{ $attribute->id }}"
+                multiple>
+            @foreach($attribute->values as $value)
+                <option value="{{ $value->id }}">{{ $value->value }}</option>
+            @endforeach
+        </select>
     </div>
+@endforeach
+
+<button type="button" id="generate-variations" class="btn btn-primary mb-3">
+    Generate Variations
+</button>
+
+<table class="table" id="variation-table">
+    <thead>
+        <tr>
+            <th>Variation</th>
+            <th>SKU</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Image</th>
+            <th>Remove</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+</div>
+
+{{-- COLLECTION --}}
+<div class="mb-3">
+    <label class="form-label">Collection</label>
+    <select name="collection_id" class="form-select">
+        <option value="">-- Select --</option>
+        @foreach($collections as $collection)
+            <option value="{{ $collection->id }}">{{ $collection->name }}</option>
+        @endforeach
+    </select>
+</div>
+
+{{-- STATUS --}}
+<div class="mb-3">
+    <label>Status</label>
+    <select name="status" class="form-select">
+        <option value="draft">Draft</option>
+        <option value="published">Published</option>
+    </select>
+</div>
+
+{{-- VISIBILITY --}}
+<div class="mb-3">
+    <label>Visibility</label>
+    <select name="visibility" class="form-select">
+        <option value="shop">Shop</option>
+        <option value="search">Search</option>
+        <option value="both">Both</option>
+        <option value="hidden">Hidden</option>
+    </select>
+</div>
+
+<button type="submit" class="btn btn-primary">Create Product</button>
+<a href="{{ route('products.index') }}" class="btn btn-secondary">Cancel</a>
+
+</form>
+</div>
+</div>
 </main>
+
+{{-- SCRIPTS --}}
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
 
-    const productType = document.getElementById('productType');
-    const variableSection = document.getElementById('variableSection');
-    const generateBtn = document.getElementById('generateVariations');
-    const variationsWrapper = document.getElementById('variationsWrapper');
+    // Stock toggle
+    document.getElementById('manage_stock').addEventListener('change', function() {
+        document.getElementById('stock-fields').style.display = this.checked ? 'block' : 'none';
+    });
 
-    // Toggle simple / variable
-document.getElementById('productType').addEventListener('change', e => {
-    const isVariable = e.target.value === 'variable';
+    // Product type toggle
+    const typeSelect = document.getElementById('product_type');
+    const simpleBox = document.getElementById('simple-product-fields');
+    const variableBox = document.getElementById('variable-attributes');
 
-    document.getElementById('variableSection').style.display = isVariable ? 'block' : 'none';
-    document.getElementById('simpleSection').style.display = isVariable ? 'none' : 'block';
-});
+    function toggleType() {
+        if (typeSelect.value === 'variable') {
+            simpleBox.style.display = 'none';
+            variableBox.style.display = 'block';
+
+            // Enable all inputs in variable box
+            variableBox.querySelectorAll('input, select, textarea, button').forEach(el => el.disabled = false);
+
+            // Disable simple product inputs
+            simpleBox.querySelectorAll('input, select, textarea').forEach(el => el.disabled = true);
+        } else {
+            simpleBox.style.display = 'block';
+            variableBox.style.display = 'none';
+
+            // Enable simple product inputs
+            simpleBox.querySelectorAll('input, select, textarea').forEach(el => el.disabled = false);
+
+            // Disable all inputs in variable box
+            variableBox.querySelectorAll('input, select, textarea, button').forEach(el => el.disabled = true);
+        }
+    }
+
+    typeSelect.addEventListener('change', toggleType);
+    toggleType(); // Run on page load
 
     // Generate variations
-    generateBtn.addEventListener('click', () => {
+    document.getElementById('generate-variations').addEventListener('click', () => {
+        let attributes = {};
 
-        const attrs = [];
-
+        // Collect selected attribute values (store ID and name)
         document.querySelectorAll('.attribute-select').forEach(select => {
-            const values = [...select.selectedOptions].map(o => ({
-                id: o.value,
-                label: o.text
+            const attrId = select.dataset.attributeId;
+            const values = [...select.selectedOptions].map(opt => ({
+                id: opt.value,
+                name: opt.textContent
             }));
-
-            if (values.length) {
-                attrs.push({
-                    attrId: select.dataset.attributeId,
-                    values
-                });
-            }
+            if (values.length) attributes[attrId] = values;
         });
 
-        if (!attrs.length) {
-            alert('Select at least one attribute value');
+        if (!Object.keys(attributes).length) {
+            alert('Select attributes first');
             return;
         }
 
-        const cartesian = (arr) =>
-            arr.reduce((a, b) =>
-                a.flatMap(d =>
-                    b.values.map(e => [...d, {
-                        attrId: b.attrId,
-                        valueId: e.id,
-                        label: e.label
-                    }])
-                ), [[]]);
+        // Generate all possible combinations
+        const combos = Object.values(attributes)
+            .reduce((a, b) => a.flatMap(d => b.map(e => [...d, e])), [[]]);
 
-        const combos = cartesian(attrs);
-        variationsWrapper.innerHTML = '';
+        const tbody = document.querySelector('#variation-table tbody');
 
-        combos.forEach((combo, i) => {
+        // Existing combos (to avoid duplicates)
+        const existingCombos = Array.from(tbody.querySelectorAll('tr')).map(row =>
+            [...row.querySelectorAll('input[name*="[attributes][]"]')].map(i => i.value).join('-')
+        );
 
-            let html = `
-            <div class="card mb-2 variation-card">
-                <div class="card-body">
-                    <strong>${combo.map(c => c.label).join(' / ')}</strong>
+        combos.forEach(combo => {
+            const comboKey = combo.map(v => v.id).join('-');
+            if (existingCombos.includes(comboKey)) return; // skip existing
 
-                    <div class="row g-2 mt-2">
-                        <div class="col">
-                            <input name="variations[${i}][sku]" class="form-control" placeholder="SKU">
-                        </div>
-                        <div class="col">
-                            <input name="variations[${i}][price]" class="form-control variation-price" placeholder="Price">
-                        </div>
-                        <div class="col">
-                            <input name="variations[${i}][sale_price]" class="form-control variation-sale-price" placeholder="Sale">
-                        </div>
-                        <div class="col">
-                            <input name="variations[${i}][qty]" class="form-control variation-qty" placeholder="Qty">
-                        </div>
-                    </div>
+            const index = tbody.children.length;
 
-                    <div class="mt-2">
-                        <input type="file" name="variations[${i}][image]" class="form-control">
-                    </div>
-                                <button type="button" class="btn btn-sm btn-danger remove-variation">✕</button>
-
-            `;
-
-            combo.forEach(c => {
-                html += `
-                <input type="hidden"
-                    name="variations[${i}][attributes][${c.attrId}]"
-                    value="${c.valueId}">
-                `;
-            });
-
-            html += `</div></div>`;
-            variationsWrapper.insertAdjacentHTML('beforeend', html);
+            tbody.innerHTML += `
+            <tr>
+                <td>${combo.map(v => v.name).join(' / ')}</td>
+                <td><input type="text" name="variations[${index}][sku]" class="form-control"></td>
+                <td><input type="number" step="0.01" name="variations[${index}][regular_price]" class="form-control"></td>
+                <td><input type="number" name="variations[${index}][stock_quantity]" class="form-control"></td>
+                <td>
+                    <input type="file" name="variations[${index}][image]" class="variation-image-input">
+                    <img class="variation-preview mt-1" style="max-width:60px; display:none;">
+                </td>
+                <td><button type="button" class="btn btn-sm btn-danger remove-variation"> Remove</button></td>
+                ${combo.map(v => `<input type="hidden" name="variations[${index}][attributes][]" value="${v.id}">`).join('')}
+            </tr>`;
         });
     });
-document.addEventListener('click', e => {
-    if (e.target.classList.contains('remove-variation')) {
-        e.target.closest('.variation-card').remove();
-    }
-});
 
-    // Bulk apply
-    document.getElementById('applyBulk').addEventListener('click', () => {
-        document.querySelectorAll('.variation-price')
-            .forEach(i => i.value = document.getElementById('bulk_price').value);
+    // Remove variation
+    let removedVariations = [];
+    document.addEventListener('click', function(e) {
+        if (!e.target.classList.contains('remove-variation')) return;
+        if (!confirm('Remove this variation?')) return;
 
-        document.querySelectorAll('.variation-sale-price')
-            .forEach(i => i.value = document.getElementById('bulk_sale_price').value);
+        const row = e.target.closest('tr');
+        const variationId = row.dataset.id;
 
-        document.querySelectorAll('.variation-qty')
-            .forEach(i => i.value = document.getElementById('bulk_qty').value);
+        if (variationId) {
+            removedVariations.push(variationId);
+            document.getElementById('removedVariations').value = removedVariations.join(',');
+        }
+
+        row.remove();
+    });
+
+    // Variation image preview
+    document.addEventListener('change', function(e) {
+        if (!e.target.classList.contains('variation-image-input')) return;
+
+        const preview = e.target.nextElementSibling;
+        const file = e.target.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                preview.src = reader.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
     });
 
 });
 </script>
-
 
 @endsection
