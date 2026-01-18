@@ -93,7 +93,39 @@ class Product extends Model
     {
         return $this->hasMany(ProductVariation::class);
     }
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class);
+    }
+
+    public function approvedReviews()
+    {
+        return $this->hasMany(ProductReview::class)->where('status', 'approved');
+    }
+
+    public function averageRating()
+    {
+        return $this->approvedReviews()->avg('rating');
+    }
 
 
+    public function reviewsCount()
+    {
+        return $this->approvedReviews()->count();
+    }
 
+    public function ratingDistribution()
+    {
+        return $this->approvedReviews()
+            ->selectRaw('rating, COUNT(*) as count')
+            ->groupBy('rating')
+            ->orderBy('rating', 'desc')
+            ->pluck('count', 'rating')
+            ->toArray();
+    }
 }

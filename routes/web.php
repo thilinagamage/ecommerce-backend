@@ -3,8 +3,10 @@
 use App\Http\Controllers\Admin\Dashboard\OverviewController;
 use App\Http\Controllers\Admin\Products\AttributeController;
 use App\Http\Controllers\Admin\Products\CategoryController;
+use App\Http\Controllers\Admin\Products\InventoryController;
 use App\Http\Controllers\Admin\Products\ProductController;
 use App\Http\Controllers\Admin\Products\ProductVariationController;
+use App\Http\Controllers\Admin\Products\ReviewController;
 use App\Http\Controllers\Admin\Products\TagController;
 use App\Http\Controllers\Admin\User\UserController;
 use Illuminate\Support\Facades\Route;
@@ -98,6 +100,34 @@ Route::prefix('tags')->controller(TagController::class)->group(function() {
 
 
 });
+Route::prefix('inventory')->controller(InventoryController::class)->group(function() {
+    Route::get('/', 'index')->name('products.inventory.index');
+    Route::get('/adjust/{id}', 'adjustStock')->name('products.inventory.adjust');
+    Route::put('/update/{id}','updateStock')->name('products.inventory.update');
+    Route::get('/movements','movements')->name('products.inventory.movements');
+    Route::get('/low-stock', 'lowStock')->name('products.inventory.low-stock');
+    Route::get('/out-of-stock','outOfStock')->name('products.inventory.out-of-stock');
+    Route::get('/variations/{id}', 'viewVariations')->name('variations');
+
+
+});
+Route::prefix('reviews')->controller(ReviewController::class)->group(function() {
+    Route::get('/','index')->name('products.reviews.index');
+    Route::get('/create','create')->name('products.reviews.create');
+    Route::post('/','store')->name('products.reviews.store');
+    Route::get('/{id}','show')->name('products.reviews.show');
+    Route::get('/{id}/edit','edit')->name('products.reviews.edit');
+    Route::put('/{id}','update')->name('products.reviews.update');
+    Route::delete('/{id}','destroy')->name('reviews.destroy');
+
+    // Additional actions
+    Route::post('/bulk-action','bulkAction')->name('products.reviews.bulk-action');
+    Route::post('/{id}/status','updateStatus')->name('products.reviews.update-status');
+    Route::post('/{id}/reply','addReply')->name('products.reviews.add-reply');
+
+
+});
+
 
 
 
