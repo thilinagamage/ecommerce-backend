@@ -7,7 +7,7 @@ use Illuminate\Support\Str;
 
 class Collection extends Model
 {
-        protected $fillable = [
+       protected $fillable = [
         'name',
         'slug',
         'description',

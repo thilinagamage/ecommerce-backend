@@ -37,9 +37,7 @@
                 </li>
                 <li> <a href="{{ route('products.tags.index') }}"><i class="bi bi-circle"></i>Tags</a>
                 </li>
-                <li> <a href="{{ route('products.inventory.index') }}"><i class="bi bi-circle"></i>Inventory</a>
-                </li>
-                <li> <a href="{{ route('products.reviews.index') }}"><i class="bi bi-circle"></i>Reviews</a>
+                <li> <a href="{{ route('products.collections.index') }}"><i class="bi bi-circle"></i>Collections</a>
                 </li>
               </ul>
             </li>

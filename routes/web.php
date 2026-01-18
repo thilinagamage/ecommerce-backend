@@ -4,7 +4,7 @@ use App\Http\Controllers\Admin\Dashboard\OverviewController;
 use App\Http\Controllers\Admin\Orders\OrderController;
 use App\Http\Controllers\Admin\Products\AttributeController;
 use App\Http\Controllers\Admin\Products\CategoryController;
-use App\Http\Controllers\Admin\Products\InventoryController;
+use App\Http\Controllers\Admin\Products\CollectionController;
 use App\Http\Controllers\Admin\Products\ProductController;
 use App\Http\Controllers\Admin\Products\ProductVariationController;
 use App\Http\Controllers\Admin\Products\ReviewController;
@@ -149,6 +149,18 @@ Route::prefix('orders')->controller(OrderController::class)->group(function() {
 });
 
 
+
+
+Route::prefix('collections')->controller(CollectionController::class)->group(function() {
+    Route::get('/', 'index')->name('products.collections.index');
+    Route::get('/create','create')->name('products.collections.create');
+    Route::post('/store', 'store')->name('products.collections.store');
+    Route::get('/{collection}/edit', 'edit')->name('products.collections.edit');
+    Route::put('/{collection}', 'update')->name('products.collections.update');
+    Route::delete('/{collection}', 'destroy')->name('products.collections.destroy');
+
+
+});
 
 
 

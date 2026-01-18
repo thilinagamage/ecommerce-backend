@@ -119,13 +119,9 @@ class Product extends Model
         return $this->approvedReviews()->count();
     }
 
-    public function ratingDistribution()
+        public function collections()
     {
-        return $this->approvedReviews()
-            ->selectRaw('rating, COUNT(*) as count')
-            ->groupBy('rating')
-            ->orderBy('rating', 'desc')
-            ->pluck('count', 'rating')
-            ->toArray();
+        return $this->belongsToMany(Collection::class);
     }
+
 }
