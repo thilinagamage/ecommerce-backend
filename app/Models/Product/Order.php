@@ -2,6 +2,7 @@
 
 namespace App\Models\Product;
 
+use App\Models\Marketing\LoyaltyPointTransaction;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
@@ -217,9 +218,27 @@ class Order extends Model
         return in_array($this->status, ['pending', 'processing']);
     }
 
+
     public function canBeRefunded()
     {
         return $this->payment_status === 'paid' &&
-               in_array($this->status, ['delivered', 'shipped']);
+            in_array($this->status, ['delivered', 'shipped', 'processing']);
+    }
+
+    public function getTotalRefundedAttribute()
+    {
+        return $this->refunds()
+            ->whereIn('status', ['approved', 'completed'])
+            ->sum('amount');
+    }
+
+    public function getRemainingRefundableAmountAttribute()
+    {
+        return $this->total - $this->total_refunded;
+    }
+
+    public function loyaltyTransactions()
+    {
+        return $this->hasMany(LoyaltyPointTransaction::class);
     }
 }
