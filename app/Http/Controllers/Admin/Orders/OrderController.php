@@ -201,34 +201,36 @@ public function store(Request $request)
         return view('orders.edit', compact('order', 'users'));
     }
 
-    public function update(Request $request, $id)
-    {
-        $order = Order::findOrFail($id);
+ public function update(Request $request, $id)
+{
+    $order = Order::findOrFail($id);
 
-        $validated = $request->validate([
-            'customer_name' => 'required|string|max:255',
-            'customer_email' => 'required|email|max:255',
-            'customer_phone' => 'nullable|string|max:20',
-            'billing_address_line1' => 'required|string|max:255',
-            'billing_address_line2' => 'nullable|string|max:255',
-            'billing_city' => 'required|string|max:100',
-            'billing_state' => 'nullable|string|max:100',
-            'billing_postal_code' => 'required|string|max:20',
-            'billing_country' => 'required|string|max:100',
-            'shipping_address_line1' => 'nullable|string|max:255',
-            'shipping_city' => 'nullable|string|max:100',
-            'shipping_postal_code' => 'nullable|string|max:20',
-            'shipping_country' => 'nullable|string|max:100',
-            'payment_method' => 'nullable|string',
-            'tracking_number' => 'nullable|string',
-            'admin_notes' => 'nullable|string',
-        ]);
+    $validated = $request->validate([
+        'customer_name' => 'required|string|max:255',
+        'customer_email' => 'required|email|max:255',
+        'customer_phone' => 'nullable|string|max:20',
+        'billing_address_line1' => 'required|string|max:255',
+        'billing_address_line2' => 'nullable|string|max:255',
+        'billing_city' => 'required|string|max:100',
+        'billing_state' => 'nullable|string|max:100',
+        'billing_postal_code' => 'required|string|max:20',
+        'billing_country' => 'required|string|max:100',
+        'shipping_address_line1' => 'nullable|string|max:255',
+        'shipping_city' => 'nullable|string|max:100',
+        'shipping_postal_code' => 'nullable|string|max:20',
+        'shipping_country' => 'nullable|string|max:100',
+        'payment_method' => 'nullable|string',
+        'payment_status' => 'required|in:pending,paid,failed,refunded,partially_refunded',
+        'tracking_number' => 'nullable|string',
+        'shipping_method' => 'nullable|string',
+        'admin_notes' => 'nullable|string',
+    ]);
 
-        $order->update($validated);
+    $order->update($validated);
 
-        return redirect()->route('orders.show', $order->id)
-            ->with('success', 'Order updated successfully');
-    }
+    return redirect()->route('orders.show', $order->id)
+        ->with('success', 'Order updated successfully');
+}
 
     public function destroy($id)
     {
@@ -257,10 +259,12 @@ public function updateStatus(Request $request, $id)
             $request->has('notify_customer')
         );
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Order status updated successfully'
-        ]);
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => 'Order status updated successfully'
+        // ])
+        return back()->with('success', 'Product Status updated successfully');;
+
 
     } catch (\Exception $e) {
         return response()->json([
@@ -300,25 +304,118 @@ public function updateStatus(Request $request, $id)
     }
 
     // Process refund
-    public function refund(Request $request, $id)
-    {
-        $order = Order::findOrFail($id);
+  public function refund(Request $request, $id)
+{
+    $order = Order::findOrFail($id);
 
-        $request->validate([
-            'amount' => 'required|numeric|min:0|max:' . $order->total,
-            'reason' => 'required|string',
-        ]);
-
-        $refund = $order->refunds()->create([
-            'refund_number' => OrderRefund::generateRefundNumber(),
-            'amount' => $request->amount,
-            'reason' => $request->reason,
-            'status' => 'pending',
-            'user_id' => auth()->id(),
-        ]);
-
-        return back()->with('success', 'Refund request created successfully');
+    // Check if order can be refunded
+    if (!$order->canBeRefunded()) {
+        return back()->with('error', 'This order cannot be refunded. Order must be paid and delivered/shipped.');
     }
+
+    $validated = $request->validate([
+        'amount' => 'required|numeric|min:0.01|max:' . $order->remaining_refundable_amount,
+        'reason' => 'required|string',
+    ]);
+
+    // Create refund record
+    $refund = $order->refunds()->create([
+        'refund_number' => OrderRefund::generateRefundNumber(),
+        'amount' => $validated['amount'],
+        'reason' => $validated['reason'],
+        'status' => 'pending', // Start as pending for admin approval
+        'user_id' => auth()->id(),
+    ]);
+
+    // Update order payment status
+    if ($validated['amount'] >= $order->total) {
+        // Full refund
+        $order->update(['payment_status' => 'refunded']);
+    } else {
+        // Partial refund
+        $order->update(['payment_status' => 'partially_refunded']);
+    }
+
+    // Add order note
+    $order->notes()->create([
+        'note' => "Refund requested: $" . number_format($validated['amount'], 2) . " - " . $validated['reason'],
+        'customer_visible' => true,
+        'user_id' => auth()->id(),
+    ]);
+
+    return back()->with('success', 'Refund request created successfully. Refund #' . $refund->refund_number);
+}
+
+// Add method to approve refund
+public function approveRefund(Request $request, $orderId, $refundId)
+{
+    $order = Order::findOrFail($orderId);
+    $refund = OrderRefund::findOrFail($refundId);
+
+    if ($refund->status !== 'pending') {
+        return back()->with('error', 'This refund has already been processed');
+    }
+
+    $validated = $request->validate([
+        'admin_note' => 'nullable|string',
+    ]);
+
+    // Update refund status
+    $refund->update([
+        'status' => 'completed',
+        'admin_note' => $validated['admin_note'] ?? 'Refund approved by admin',
+    ]);
+
+    // Add order note
+    $order->notes()->create([
+        'note' => "Refund #{$refund->refund_number} completed: $" . number_format($refund->amount, 2),
+        'customer_visible' => true,
+        'user_id' => auth()->id(),
+    ]);
+
+    return back()->with('success', 'Refund approved and completed');
+}
+
+// Add method to reject refund
+public function rejectRefund(Request $request, $orderId, $refundId)
+{
+    $order = Order::findOrFail($orderId);
+    $refund = OrderRefund::findOrFail($refundId);
+
+    if ($refund->status !== 'pending') {
+        return back()->with('error', 'This refund has already been processed');
+    }
+
+    $validated = $request->validate([
+        'admin_note' => 'required|string',
+    ]);
+
+    // Update refund status
+    $refund->update([
+        'status' => 'rejected',
+        'admin_note' => $validated['admin_note'],
+    ]);
+
+    // Revert order payment status if this was the only refund
+    $completedRefunds = $order->refunds()
+        ->whereIn('status', ['approved', 'completed'])
+        ->sum('amount');
+
+    if ($completedRefunds == 0) {
+        $order->update(['payment_status' => 'paid']);
+    } elseif ($completedRefunds < $order->total) {
+        $order->update(['payment_status' => 'partially_refunded']);
+    }
+
+    // Add order note
+    $order->notes()->create([
+        'note' => "Refund #{$refund->refund_number} rejected: " . $validated['admin_note'],
+        'customer_visible' => false,
+        'user_id' => auth()->id(),
+    ]);
+
+    return back()->with('success', 'Refund rejected');
+}
 
     // Print invoice
     public function invoice($id)

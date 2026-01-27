@@ -253,13 +253,13 @@
 
             {{-- Sidebar --}}
             <div class="col-md-4">
-                {{-- Order Status --}}
+                    {{-- Order Status --}}
                 <div class="card mb-3">
                     <div class="card-header bg-light">
                         <h5 class="mb-0">Order Status</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('orders.update-status', $order->id) }}">
+                        <form method="POST" action="{{ route('update-status', $order->id) }}">
                             @csrf
                             <div class="mb-3">
                                 <label class="form-label">Status</label>
@@ -358,26 +358,113 @@
                             <h5 class="mb-0">Refunds</h5>
                         </div>
                         <div class="card-body">
-                            @forelse($order->refunds as $refund)
-                                <div class="mb-2 p-2 bg-light rounded">
-                                    <div class="d-flex justify-content-between">
-                                        <strong>{{ $refund->refund_number }}</strong>
-                                        <span class="badge bg-{{ $refund->status === 'completed' ? 'success' : 'warning' }}">
-                                            {{ ucfirst($refund->status) }}
-                                        </span>
+                            @if($order->refunds->count() > 0)
+                                @foreach($order->refunds as $refund)
+                                    <div class="mb-3 p-3 border rounded {{ $refund->status === 'pending' ? 'bg-light' : '' }}">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <strong>{{ $refund->refund_number }}</strong>
+                                                <span class="badge bg-{{ $refund->status === 'completed' ? 'success' : ($refund->status === 'pending' ? 'warning' : 'danger') }} ms-2">
+                                                    {{ ucfirst($refund->status) }}
+                                                </span>
+                                            </div>
+                                            <div class="text-end">
+                                                <strong class="text-danger">${{ number_format($refund->amount, 2) }}</strong>
+                                                <br>
+                                                <small class="text-muted">{{ $refund->created_at->format('M d, Y') }}</small>
+                                            </div>
+                                        </div>
+                                        @if($refund->reason)
+                                            <div class="mt-2">
+                                                <strong>Reason:</strong> {{ $refund->reason }}
+                                            </div>
+                                        @endif
+                                        @if($refund->admin_note)
+                                            <div class="mt-2">
+                                                <strong>Admin Note:</strong> {{ $refund->admin_note }}
+                                            </div>
+                                        @endif
+
+                                        @if($refund->status === 'pending')
+                                            <div class="mt-3">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-success me-2"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#approveRefundModal{{ $refund->id }}">
+                                                    Approve Refund
+                                                </button>
+                                                <button type="button"
+                                                        class="btn btn-sm btn-danger"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#rejectRefundModal{{ $refund->id }}">
+                                                    Reject Refund
+                                                </button>
+                                            </div>
+
+                                            {{-- Approve Modal --}}
+                                            <div class="modal fade" id="approveRefundModal{{ $refund->id }}" tabindex="-1">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <form method="POST" action="{{ route('orders.refund.approve', [$order->id, $refund->id]) }}">
+                                                            @csrf
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Approve Refund</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p>Are you sure you want to approve this refund of <strong>${{ number_format($refund->amount, 2) }}</strong>?</p>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Admin Note (Optional)</label>
+                                                                    <textarea name="admin_note" class="form-control" rows="2"></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-success">Approve Refund</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {{-- Reject Modal --}}
+                                            <div class="modal fade" id="rejectRefundModal{{ $refund->id }}" tabindex="-1">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <form method="POST" action="{{ route('orders.refund.reject', [$order->id, $refund->id]) }}">
+                                                            @csrf
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">Reject Refund</h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p>Please provide a reason for rejecting this refund:</p>
+                                                                <div class="mb-3">
+                                                                    <label class="form-label">Rejection Reason <span class="text-danger">*</span></label>
+                                                                    <textarea name="admin_note" class="form-control" rows="3" required></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                <button type="submit" class="btn btn-danger">Reject Refund</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endif
                                     </div>
-                                    <div>Amount: ${{ number_format($refund->amount, 2) }}</div>
-                                    @if($refund->reason)
-                                        <small class="text-muted">{{ $refund->reason }}</small>
-                                    @endif
-                                </div>
-                            @empty
+                                @endforeach
+                            @else
                                 <p class="text-muted mb-2">No refunds yet.</p>
-                            @endforelse
+                            @endif
 
                             @if($order->canBeRefunded())
+                                <div class="alert alert-info">
+                                    <strong>Refundable Amount:</strong> ${{ number_format($order->remaining_refundable_amount, 2) }}
+                                </div>
                                 <button type="button" class="btn btn-warning btn-sm w-100" data-bs-toggle="modal" data-bs-target="#refundModal">
-                                    Process Refund
+                                    Request Refund
                                 </button>
                             @endif
                         </div>
@@ -398,7 +485,7 @@
                                 Print Invoice
                             </a>
                             @if($order->canBeCancelled())
-                                <form method="POST" action="{{ route('orders.update-status', $order->id) }}">
+                                <form method="POST" action="{{ route('update-status', $order->id) }}">
                                     @csrf
                                     <input type="hidden" name="status" value="cancelled">
                                     <button type="submit" class="btn btn-danger btn-sm w-100" onclick="return confirm('Cancel this order?')">

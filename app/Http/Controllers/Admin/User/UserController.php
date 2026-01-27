@@ -99,4 +99,6 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('sucess', 'User Deeleted Sucessfully');
     }
 
+   
+
 }

@@ -1,6 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\Analytics\AnalyticsController;
+use App\Http\Controllers\Admin\Dashboard\DashboardController;
 use App\Http\Controllers\Admin\Dashboard\OverviewController;
+use App\Http\Controllers\Admin\Marketing\CampaignController;
+use App\Http\Controllers\Admin\Marketing\CouponController;
+use App\Http\Controllers\Admin\Marketing\GiftCardController;
+use App\Http\Controllers\Admin\Marketing\LoyaltyController;
 use App\Http\Controllers\Admin\Orders\OrderController;
 use App\Http\Controllers\Admin\Products\AttributeController;
 use App\Http\Controllers\Admin\Products\CategoryController;
@@ -141,14 +147,87 @@ Route::prefix('orders')->controller(OrderController::class)->group(function() {
 
     // Additional actions
     Route::post('/{id}/status','updateStatus')->name('update-status');
-    Route::post('/{id}/payment-status', )->name('orders.add-note');
+    Route::post('/{id}/payment-status','addNote' )->name('orders.add-note');
     Route::post('/{id}/refund', 'refund')->name('orders.refund');
     Route::get('/{id}/invoice', 'invoice')->name('orders.invoice');
-
+Route::post('/{orderId}/refund/{refundId}/approve',  'approveRefund')->name('orders.refund.approve');
+Route::post('/{orderId}/refund/{refundId}/reject','rejectRefund')->name('orders.refund.reject');
 
 });
 
+Route::prefix('coupons')->controller(CouponController::class)->group(function() {
 
+    Route::get('/','index')->name('marketing.coupons.index');
+    Route::get('/create', 'create')->name('marketing.coupons.create');
+    Route::post('/', 'store')->name('marketing.coupons.store');
+    Route::get('/{id}/edit','edit')->name('marketing.coupons.edit');
+    Route::put('/{id}','update')->name('marketing.coupons.update');
+    Route::delete('/{id}','destroy')->name('marketing.coupons.destroy');
+    Route::get('/generate-code','generateCode')->name('marketing.coupons.generate-code');
+    Route::post('/validate','validate')->name('marketing.coupons.validate');
+
+});
+
+Route::prefix('gift-cards')->controller(GiftCardController::class)->group(function() {
+
+    Route::get('/','index')->name('marketing.gift-cards.index');
+    Route::get('/create','create')->name('marketing.gift-cards.create');
+    Route::post('/','store')->name('marketing.gift-cards.store');
+    Route::get('/{id}','show')->name('marketing.gift-cards.show');
+    Route::put('/{id}', 'update')->name('marketing.gift-cards.update');
+
+});
+
+Route::prefix('campaigns')->controller(CampaignController::class)->group(function() {
+  Route::get('/','index')->name('marketing.campaigns.index');
+    Route::get('/create','create')->name('marketing.campaigns.create');
+    Route::post('/', 'store')->name('marketing.campaigns.store');
+    Route::get('/{id}','show')->name('marketing.campaigns.show');
+    Route::post('/{id}/send','send')->name('marketing.campaigns.send');
+});
+
+// Loyalty Program Routes
+Route::prefix('loyalty')->controller(LoyaltyController::class)->group(function () {
+    // Route::get('/', 'index')->name('marketing.loyalty.index');
+    // Route::get('/customers','customers')->name('marketing.loyalty.customers');
+    // Route::get('/tiers', 'tiers')->name('marketing.loyalty.tiers');
+    // Route::post('/tiers','storeTier')->name('marketing.loyalty.tiers.store');
+    // Route::put('/tiers/{tier}','updateTier')->name('marketing.loyalty.tiers.update');
+    // Route::delete('/tiers/{tier}',  'destroyTier')->name('marketing.loyalty.tiers.destroy');
+
+
+     // Dashboard
+    Route::get('/', [LoyaltyController::class, 'index'])->name('marketing.loyalty.index');
+
+    // Customers
+    Route::get('/customers', 'customers')->name('marketing.loyalty.customers');
+    Route::get('/customers/{id}','customerDetail')->name('marketing.loyalty.customers.detail');
+    Route::post('/customers/{customer}/adjust','adjustPoints')->name('marketing.loyalty.customers.adjust');
+    Route::get('/customers/export', 'exportCustomers')->name('marketing.loyalty.customers.export');
+    Route::post('/customers/bulk-award', 'bulkAward')->name('marketing.loyalty.customers.bulk-award');
+
+    // Tiers
+    Route::get('/tiers', 'tiers')->name('marketing.loyalty.tiers');
+    Route::post('/tiers', 'storeTier')->name('marketing.loyalty.tiers.store');
+    Route::put('/tiers/{tier}',  'updateTier')->name('marketing.loyalty.tiers.update');
+    Route::delete('/tiers/{tier}','destroyTier')->name('marketing.loyalty.tiers.destroy');
+    Route::post('/tiers/sync',  'syncTiers')->name('marketing.loyalty.tiers.sync');
+
+    // Reports
+    Route::get('/reports',  'reports')->name('marketing.loyalty.reports');
+
+    // Settings
+    Route::get('/settings', 'settings')->name('marketing.loyalty.settings');
+    Route::put('/settings', 'updateSettings')->name('marketing.loyalty.settings.update');
+});
+
+Route::prefix('analytics')->controller(AnalyticsController::class)->group(function () {
+    Route::get('/sales', 'sales')->name('analytics.sales');
+    Route::get('/customers','customers')->name('analytics.customers');
+    Route::get('/products','products')->name('analytics.products');
+    Route::get('/reports', 'reports')->name('analytics.reports');
+    Route::get('/reports/export','exportReport')->name('analytics.reports.export');
+});
 
 
 Route::prefix('collections')->controller(CollectionController::class)->group(function() {
@@ -171,8 +250,5 @@ Route::prefix('collections')->controller(CollectionController::class)->group(fun
 
 
 
+    Route::get('/', [DashboardController::class, 'index'])->name('admin.dashboard.index');
 
-
-Route::get('/', function (OverviewController $controller) {
-    return $controller->index();
-})->name('admin.dashboard.index');

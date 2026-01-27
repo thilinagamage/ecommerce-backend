@@ -228,11 +228,30 @@
                                            value="{{ old('payment_method', $order->payment_method) }}">
                                 </div>
                                 <div class="col-md-6 mb-3">
+                                    <label class="form-label">Payment Status</label>
+                                    <select name="payment_status" class="form-select">
+                                        <option value="pending" {{ old('payment_status', $order->payment_status) == 'pending' ? 'selected' : '' }}>Pending</option>
+                                        <option value="paid" {{ old('payment_status', $order->payment_status) == 'paid' ? 'selected' : '' }}>Paid</option>
+                                        <option value="failed" {{ old('payment_status', $order->payment_status) == 'failed' ? 'selected' : '' }}>Failed</option>
+                                        <option value="refunded" {{ old('payment_status', $order->payment_status) == 'refunded' ? 'selected' : '' }}>Refunded</option>
+                                        <option value="partially_refunded" {{ old('payment_status', $order->payment_status) == 'partially_refunded' ? 'selected' : '' }}>Partially Refunded</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
                                     <label class="form-label">Tracking Number</label>
                                     <input type="text"
                                            name="tracking_number"
                                            class="form-control"
                                            value="{{ old('tracking_number', $order->tracking_number) }}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Shipping Method</label>
+                                    <input type="text"
+                                           name="shipping_method"
+                                           class="form-control"
+                                           value="{{ old('shipping_method', $order->shipping_method) }}">
                                 </div>
                             </div>
                             <div class="mb-3">

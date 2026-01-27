@@ -10,9 +10,10 @@
   <script src="{{ asset('assets/plugins/vectormap/jquery-jvectormap-2.0.2.min.js') }}"></script>
   <script src="{{ asset('assets/plugins/vectormap/jquery-jvectormap-world-mill-en.js') }}"></script>
   <script src="{{ asset('assets/js/pace.min.js') }}"></script>
-  <script src="{{ asset('assets/plugins/chartjs/js/Chart.min.js') }}"></script>
-  <script src="{{ asset('assets/plugins/chartjs/js/Chart.extension.js') }}"></script>
-  <script src="{{ asset('assets/plugins/apexcharts-bundle/js/apexcharts.min.js') }}"></script>
+  {{-- <script src="{{ asset('assets/plugins/chartjs/js/Chart.min.js') }}"></script>
+  <script src="{{ asset('assets/plugins/chartjs/js/Chart.extension.js') }}"></script> --}}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  {{-- <script src="{{ asset('assets/plugins/apexcharts-bundle/js/apexcharts.min.js') }}"></script> --}}
   <script src="{{ asset('assets/plugins/fancy-file-uploader/jquery.fileupload.js')}}"></script>
   <script src="{{ asset('assets/plugins/fancy-file-uploader/jquery.ui.widget.js')}}"></script>
   <script src="{{ asset('assets/plugins/fancy-file-uploader/jquery.fancy-fileupload.js')}}"></script>
@@ -21,7 +22,7 @@
   <script src="{{ asset('assets/js/form-select2.js')}}"></script>
   <!--app-->
   <script src="{{ asset('assets/js/app.js') }}"></script>
-  <script src="{{ asset('assets/js/index4.js') }}"></script>
+  {{-- <script src="{{ asset('assets/js/index4.js') }}"></script> --}}
   <script>
     new PerfectScrollbar(".best-product")
  </script>

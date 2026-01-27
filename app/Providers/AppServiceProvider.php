@@ -2,23 +2,20 @@
 
 namespace App\Providers;
 
+use App\Models\Product\Order;
+use App\Observers\OrderObserver;
+use App\Services\LoyaltyService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        //
+        $this->app->singleton(LoyaltyService::class);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
-        //
+        Order::observe(OrderObserver::class);
     }
 }
