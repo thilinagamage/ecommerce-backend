@@ -3,8 +3,34 @@
                 <div>
                     <img src="{{ asset('assets/images/logo-icon.png') }}" class="logo-icon" alt="logo icon">
                 </div>
-                <div>
-                    <h4 class="logo-text">Sahasra Labs</h4>
+                <div class="menu-title">Dashboard</div>
+              </a>
+
+            </li>
+
+
+            <li>
+              <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon"><i class="bi bi-basket2-fill"></i>
+                </div>
+                <div class="menu-title">Products</div>
+              </a>
+              <ul>
+                <li> <a href="{{ route('products.index') }}"><i class="bi bi-circle"></i>Products List</a>
+                </li>
+                <li> <a href="{{ route('products.categories.index') }}"><i class="bi bi-circle"></i>Categories</a>
+                </li>
+                <li> <a href="{{ route('products.attributes.index') }}"><i class="bi bi-circle"></i>Attributes</a>
+                </li>
+                <li> <a href="{{ route('products.tags.index') }}"><i class="bi bi-circle"></i>Tags</a>
+                </li>
+                <li> <a href="{{ route('products.collections.index') }}"><i class="bi bi-circle"></i>Collections</a>
+                </li>
+              </ul>
+            </li>
+            <li>
+              <a href="javascript:;" class="has-arrow">
+                <div class="parent-icon"><i class="fadeIn animated bx bx-dollar-circle"></i>
                 </div>
                 <div class="toggle-icon ms-auto"> <i class="bi bi-list"></i>
                 </div>
